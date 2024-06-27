@@ -1,11 +1,23 @@
-import { useContext } from 'react';
+import { useState, useContext } from 'react';
 import { SessionContext } from "../SessionProvider";
 import { Navigate } from 'react-router-dom';
 import { SideMenu } from '../components/SideMenu';
+import { postRepository } from '../repositories/post';
 
 function Home() {
+
+    // コンテンツの投稿
+    const [content, setContent] = useState('');
+
     // currentUserにログイン情報を受け渡す
     const { currentUser } = useContext(SessionContext);
+
+    // 作成ボタンを押したときの処理
+    const createPost = async () => {
+        const post = await postRepository.create(content, currentUser.id);
+        console.log(post);
+        setContent('');
+    }
 
     // currentUserがnullなら（＝未ログイン）なら/signinに遷移させる
     if(currentUser == null) return <Navigate replace to="/signin" />;
@@ -25,8 +37,16 @@ function Home() {
                 <textarea
                   className="w-full p-2 mb-4 border-2 border-gray-200 rounded-md"
                   placeholder="What's on your mind?"
+                //   投稿内容をsetContentに渡す
+                onChange={(e) => setContent(e.target.value)}
+                // contentを表示して、見た目を何もない状態にする
+                value={content}
                 />
-                <button className="bg-[#34D399] text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button 
+                    className="bg-[#34D399] text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={createPost}
+                    disabled={content === ''}
+                >
                   Post
                 </button>
               </div>
