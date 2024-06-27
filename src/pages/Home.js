@@ -1,23 +1,49 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { SessionContext } from "../SessionProvider";
 import { Navigate } from 'react-router-dom';
 import { SideMenu } from '../components/SideMenu';
 import { postRepository } from '../repositories/post';
+import { Post } from '../components/Post';
 
 function Home() {
 
     // コンテンツの投稿
     const [content, setContent] = useState('');
 
+    // 投稿内容の表示
+    const [posts, setPosts] = useState([]);
+
     // currentUserにログイン情報を受け渡す
     const { currentUser } = useContext(SessionContext);
+
+    // 投稿内容を表示する
+    useEffect(() => {
+        fetchPosts();
+    }, []);
 
     // 作成ボタンを押したときの処理
     const createPost = async () => {
         const post = await postRepository.create(content, currentUser.id);
-        console.log(post);
+        
+        // リアルタイムで投稿内容が表示されるような処理
+        setPosts([
+            // 直近の投稿
+            {
+                ...post
+                ,userId: currentUser.id
+                ,userName: currentUser.userName
+            // ここに過去の投稿をくっつける処理
+            },...posts,
+        ]);
+
         setContent('');
     }
+
+    // postsの表示
+    const fetchPosts = async () => {
+        const posts = await postRepository.find();
+        setPosts(posts);
+    };
 
     // currentUserがnullなら（＝未ログイン）なら/signinに遷移させる
     if(currentUser == null) return <Navigate replace to="/signin" />;
@@ -50,7 +76,11 @@ function Home() {
                   Post
                 </button>
               </div>
-              <div className="mt-4"></div>
+              <div className="mt-4">
+                {posts.map((post)=>(
+                    <Post key={post.id} post={post} />
+                ))}
+              </div>
             </div>
             <SideMenu />
           </div>
