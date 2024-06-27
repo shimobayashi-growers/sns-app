@@ -28,6 +28,8 @@ export const authRepository = {
     },
 
     async getCurrentUser() {
+        // getSessionでログイン情報を取得
+        // jwtが1時間まではsessionに保存してくれる
         const {data, error } = await supabase.auth.getSession();
         if(error != null) throw new Error(error.message);
         if(data.session == null) return;
