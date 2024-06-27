@@ -1,15 +1,23 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { authRepository } from '../repositories/auth';
+import { SessionContext } from '../SessionProvider';
+import { Navigate } from 'react-router-dom';
 
 function Signup() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
+    // currentUserにログイン情報を受け渡す
+    const { currentUser, setCurrentUser } = useContext(SessionContext);
+
     const signup = async () => {
         const user = await authRepository.signup(name, email, password);
-        console.log(user);
-    }
+        setCurrentUser(user);
+    };
+
+    // currentUserがnullではない（＝ログイン）なら/に遷移させる
+    if(currentUser != null) return <Navigate replace to="/" />;
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4 sm:px-6 lg:px-8">
