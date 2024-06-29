@@ -4,6 +4,9 @@ import { Navigate } from 'react-router-dom';
 import { SideMenu } from '../components/SideMenu';
 import { postRepository } from '../repositories/post';
 import { Post } from '../components/Post';
+import { Pagination } from '../components/Pagination';
+
+const limit = 3;
 
 function Home() {
 
@@ -12,6 +15,9 @@ function Home() {
 
     // 投稿内容の表示
     const [posts, setPosts] = useState([]);
+
+    // 現在のページ数
+    const [page, setPage] = useState(1);
 
     // currentUserにログイン情報を受け渡す
     const { currentUser } = useContext(SessionContext);
@@ -40,9 +46,23 @@ function Home() {
     }
 
     // postsの表示
-    const fetchPosts = async () => {
-        const posts = await postRepository.find();
+    const fetchPosts = async (page) => {
+        const posts = await postRepository.find(page, limit);
         setPosts(posts);
+    };
+
+    // 次のページ移動
+    const moveToNext = async () => {
+        const nextPage = page + 1;
+        await fetchPosts(nextPage);
+        setPage(nextPage);
+    };
+
+    // 前のページ移動
+    const moveToPrev = async () => {
+        const prevPage = page - 1;
+        await fetchPosts(prevPage);
+        setPage(prevPage);
     };
 
     // currentUserがnullなら（＝未ログイン）なら/signinに遷移させる
@@ -81,6 +101,10 @@ function Home() {
                     <Post key={post.id} post={post} />
                 ))}
               </div>
+              <Pagination
+                onPrev={page > 1 ? moveToPrev : null}
+                onNext={posts.length >= limit ? moveToNext : null}
+                />
             </div>
             <SideMenu />
           </div>

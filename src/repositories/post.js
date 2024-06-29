@@ -12,10 +12,17 @@ export const postRepository = {
     },
 
     // viewテーブルから投稿を表示させる
-    async find() {
+    async find(page, limit) {
+
+        // paginationの処理のためにpageとそれぞれの数字を作成
+        page = isNaN(page) || page < 1 ? 1 : page;
+        const start = limit * (page - 1);
+        const end = start + limit -1;
+
         const {data,error} = await supabase
         .from("posts_view")
         .select("*")
+        .range(start, end)
         .order("created_at", { ascending: false });
         if(error!=null) throw new Error(error.message);
         // idとnameを使いやすいように加工しておく
