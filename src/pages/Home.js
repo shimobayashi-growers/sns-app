@@ -65,6 +65,13 @@ function Home() {
         setPage(prevPage);
     };
 
+    // postの削除
+    const deletePost = async (postId) => {
+        await postRepository.delete(postId);
+        // filter関数で一致するものだけひっぱりstateをきれいにする
+        setPosts(posts.filter((post) => post.id !== postId));
+    };
+
     // currentUserがnullなら（＝未ログイン）なら/signinに遷移させる
     if(currentUser == null) return <Navigate replace to="/signin" />;
 
@@ -98,7 +105,7 @@ function Home() {
               </div>
               <div className="mt-4">
                 {posts.map((post)=>(
-                    <Post key={post.id} post={post} />
+                    <Post key={post.id} post={post} onDelete={deletePost} />
                 ))}
               </div>
               <Pagination

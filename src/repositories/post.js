@@ -34,4 +34,11 @@ export const postRepository = {
             };
         });
     },
+
+    // postの削除
+    async delete(id) {
+        const {error} = await supabase.from('posts').delete().eq('id', id);
+        if(error != null) throw new Error(error.message);
+        return true;
+    },
 };
